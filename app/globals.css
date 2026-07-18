@@ -113,6 +113,22 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.4s ease;
+}
+.sidebar:hover {
+  scrollbar-color: rgba(15, 118, 110, 0.35) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.4s ease;
+}
+.sidebar:hover::-webkit-scrollbar-thumb {
+  background: rgba(15, 118, 110, 0.35);
 }
 
 .sidebarBrand {
