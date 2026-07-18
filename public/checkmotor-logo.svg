@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 128" role="img" aria-labelledby="title desc">
+  <title id="title">CheckMotor en blanco</title>
+  <desc id="desc">Logo blanco de CheckMotor con marca de verificación lima para fondos oscuros.</desc>
+  <path fill="#fff" d="M104.4 92.2A50 50 0 1 1 101 31.9L87.9 44.5A32 32 0 1 0 89.4 80Z"/>
+  <path fill="#d8f28d" d="m35.5 64.8 12.7-12.7 12.3 12.3 30-30 12.8 12.8-42.8 42.7Z"/>
+  <circle cx="108" cy="88" r="8" fill="#d8f28d"/>
+  <text x="136" y="82" fill="#fff" font-family="Manrope, Inter, system-ui, sans-serif" font-size="58" font-weight="750" letter-spacing="-3">checkmotor</text>
+  <circle cx="596" cy="78" r="6" fill="#d8f28d"/>
+</svg>

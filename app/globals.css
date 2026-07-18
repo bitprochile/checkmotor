@@ -139,14 +139,14 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 }
 
 .sidebarLogo {
-  height: 36px;
-  width: auto;
+  width: 148px;
+  height: auto;
   display: block;
 }
 
 .loginBrandLogo {
-  height: 44px;
-  width: auto;
+  width: 220px;
+  height: auto;
   display: block;
 }
 
