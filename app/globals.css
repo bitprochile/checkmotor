@@ -145,10 +145,11 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 }
 
 .loginCardLogo {
-  width: 180px;
+  width: 220px;
   height: auto;
   display: block;
   margin: 0 auto 28px;
+  mix-blend-mode: multiply;
 }
 
 .sidebarNav { flex: 1; padding: 12px 0; }
