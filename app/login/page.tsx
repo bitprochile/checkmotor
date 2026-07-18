@@ -68,9 +68,7 @@ export default function LoginPage() {
           <Settings2 size={280} strokeWidth={0.6} />
         </div>
 
-        <div className="loginBrandTop">
-          <img src="/checkmotor-logo.png" alt="Checkmotor" className="loginBrandLogo" />
-        </div>
+        <img src="/checkmotor-logo.png" alt="Checkmotor" className="loginBrandLogo" />
 
         <div className="loginBrandCenter">
           <h2 className="loginBrandHeadline">

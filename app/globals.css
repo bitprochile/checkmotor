@@ -145,9 +145,12 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 }
 
 .loginBrandLogo {
-  width: 220px;
+  width: 200px;
   height: auto;
   display: block;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
 }
 
 .sidebarNav { flex: 1; padding: 12px 0; }
