@@ -2,21 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  Eye, EyeOff,
-  AlertCircle,
-  FlaskConical,
-  ClipboardList,
-  Users,
-  Car,
-  Settings2,
-} from 'lucide-react'
-
-const TEST_USERS = [
-  { email: 'admin@taller.com',     password: 'admin123', role: 'Administrador' },
-  { email: 'mecanico@taller.com',  password: 'mec123',   role: 'Mecánico'     },
-  { email: 'recepcion@taller.com', password: 'rec123',   role: 'Recepción'    },
-]
+import { Eye, EyeOff, AlertCircle, Settings2, ClipboardList, Users, Car } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -52,12 +38,6 @@ export default function LoginPage() {
     }
   }
 
-  function fillUser(u: typeof TEST_USERS[0]) {
-    setEmail(u.email)
-    setPassword(u.password)
-    setError('')
-  }
-
   return (
     <div className="loginLayout">
 
@@ -68,7 +48,6 @@ export default function LoginPage() {
           <Settings2 size={280} strokeWidth={0.6} />
         </div>
 
-        <img src="/checkmotor-logo.png" alt="Checkmotor" className="loginBrandLogo" />
 
         <div className="loginBrandCenter">
           <h2 className="loginBrandHeadline">
@@ -103,6 +82,7 @@ export default function LoginPage() {
       {/* ── Right: Form ── */}
       <main className="loginFormPanel">
         <div className="loginCard">
+          <img src="/checkmotor-logo.png" alt="Checkmotor" className="loginCardLogo" />
           <h1 className="loginCardTitle">Iniciar sesión</h1>
           <p className="loginCardSubtitle">Ingresa tus credenciales para continuar</p>
 
@@ -157,22 +137,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Test users */}
-          <div className="loginTestUsers">
-            <div className="loginTestHeader">
-              <FlaskConical size={11} />
-              Usuarios de prueba — clic para completar
-            </div>
-            {TEST_USERS.map(u => (
-              <div key={u.email} className="loginTestRow" onClick={() => fillUser(u)}>
-                <div className="loginTestRowLeft">
-                  <span className="loginTestEmail">{u.email}</span>
-                  <span className="loginTestRole">{u.role}</span>
-                </div>
-                <span className="loginTestPass">{u.password}</span>
-              </div>
-            ))}
-          </div>
         </div>
       </main>
 
