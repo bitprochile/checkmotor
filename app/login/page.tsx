@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  Wrench,
   Eye, EyeOff,
   AlertCircle,
   FlaskConical,
@@ -70,13 +69,7 @@ export default function LoginPage() {
         </div>
 
         <div className="loginBrandTop">
-          <div className="loginBrandIconWrap">
-            <Wrench size={24} />
-          </div>
-          <div>
-            <div className="loginBrandAppName">TallerPro</div>
-            <div className="loginBrandAppSub">Gestión de taller</div>
-          </div>
+          <img src="/checkmotor-logo.png" alt="Checkmotor" className="loginBrandLogo" />
         </div>
 
         <div className="loginBrandCenter">
