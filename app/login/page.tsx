@@ -69,7 +69,7 @@ export default function LoginPage() {
         </div>
 
         <div className="loginBrandTop">
-          <img src="/checkmotor-logo.svg" alt="Checkmotor" className="loginBrandLogo" />
+          <img src="/checkmotor-logo.png" alt="Checkmotor" className="loginBrandLogo" />
         </div>
 
         <div className="loginBrandCenter">

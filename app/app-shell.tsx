@@ -142,7 +142,7 @@ export default function AppShell({ children, session }: AppShellProps) {
       {/* ── Sidebar ── */}
       <aside className="sidebar">
         <div className="sidebarBrand">
-          <img src="/checkmotor-logo.svg" alt="Checkmotor" className="sidebarLogo" />
+          <img src="/checkmotor-logo.png" alt="Checkmotor" className="sidebarLogo" />
         </div>
 
         {/* ── Búsqueda global ── */}
