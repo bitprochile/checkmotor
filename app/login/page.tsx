@@ -82,7 +82,7 @@ export default function LoginPage() {
       {/* ── Right: Form ── */}
       <main className="loginFormPanel">
         <div className="loginCard">
-          <img src="/checkmotor-logo.png" alt="Checkmotor" className="loginCardLogo" />
+          <img src="/checkmotor-logo-concept.png" alt="Checkmotor" className="loginCardLogo" />
           <h1 className="loginCardTitle">Iniciar sesión</h1>
           <p className="loginCardSubtitle">Ingresa tus credenciales para continuar</p>
 
