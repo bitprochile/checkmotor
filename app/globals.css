@@ -134,35 +134,14 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 .sidebarBrand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 20px 18px;
+  padding: 18px 20px;
   border-bottom: 1px solid #1e2e29;
 }
 
-.sidebarBrandIcon {
-  width: 36px; height: 36px;
-  background: rgba(15,118,110,0.25);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #34d399;
-  flex-shrink: 0;
-}
-
-.sidebarBrandName {
-  font-size: 15px;
-  font-weight: 800;
-  color: #e8f5f2;
-  letter-spacing: -0.3px;
-}
-
-.sidebarBrandSub {
-  font-size: 10px;
-  color: #4a6b63;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
+.sidebarLogo {
+  height: 28px;
+  width: auto;
+  display: block;
 }
 
 .sidebarNav { flex: 1; padding: 12px 0; }

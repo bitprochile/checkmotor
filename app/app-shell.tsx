@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Wrench, LayoutDashboard, ClipboardList, Users, Car, Settings, UserCog, Package, Calendar, LogOut, Search, ClipboardCheck, TrendingUp, Building2, Globe, MessageSquare } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, Users, Car, Settings, UserCog, Package, Calendar, LogOut, Search, ClipboardCheck, TrendingUp, Building2, Globe, MessageSquare } from 'lucide-react'
 
 interface AppShellProps {
   children: React.ReactNode
@@ -142,11 +142,7 @@ export default function AppShell({ children, session }: AppShellProps) {
       {/* ── Sidebar ── */}
       <aside className="sidebar">
         <div className="sidebarBrand">
-          <div className="sidebarBrandIcon"><Wrench size={18} /></div>
-          <div>
-            <div className="sidebarBrandName">TallerPro</div>
-            <div className="sidebarBrandSub">Gestión</div>
-          </div>
+          <img src="/checkmotor-logo.png" alt="Checkmotor" className="sidebarLogo" />
         </div>
 
         {/* ── Búsqueda global ── */}
