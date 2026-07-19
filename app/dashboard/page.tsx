@@ -90,10 +90,10 @@ export default async function DashboardPage() {
          ) AS mes
        ),
        ing AS (
-         SELECT DATE_TRUNC('month', updated_at) AS mes, SUM(costo_total) AS total
+         SELECT DATE_TRUNC('month', created_at) AS mes, SUM(costo_total) AS total
          FROM ordenes_trabajo
-         WHERE taller_id=$1 AND estado IN ('completada','entregada')
-           AND updated_at >= DATE_TRUNC('month', NOW()) - INTERVAL '5 months'
+         WHERE taller_id=$1
+           AND created_at >= DATE_TRUNC('month', NOW()) - INTERVAL '5 months'
          GROUP BY 1
        )
        SELECT TO_CHAR(m.mes,'Mon YY') AS mes_label, COALESCE(i.total,0) AS ingresos
