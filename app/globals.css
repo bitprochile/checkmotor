@@ -1064,18 +1064,15 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   .dbPanelsGrid { grid-template-columns: 1fr; }
   .dbChartGrid  { grid-template-columns: 1fr; }
 
-  /* Tablas con scroll horizontal interno en vez de desbordar la página */
-  .entityTable {
-    display: block;
+  /* gridPanel scrollea horizontalmente; la tabla mantiene su layout nativo */
+  .gridPanel {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
-  /* El thead pierde display:table-header-group al hacer block, lo corregimos */
-  .entityTable thead,
-  .entityTable tbody,
-  .entityTable tr { display: table; width: 100%; table-layout: auto; }
-  .entityTable thead { border-bottom: 1px solid var(--line); }
+  .entityTable {
+    min-width: max-content;
+  }
 }
 
 @media (max-width: 480px) {
