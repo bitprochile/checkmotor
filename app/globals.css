@@ -1012,6 +1012,10 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 }
 
 /* ── Responsive: mobile ── */
+/* ── Dashboard grids (responsive via class, no inline style) ── */
+.dbPanelsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.dbChartGrid  { display: grid; grid-template-columns: 1fr auto; gap: 24px; padding: 16px 20px; align-items: start; }
+
 @media (max-width: 768px) {
   .hamburgerBtn { display: flex; }
 
@@ -1036,9 +1040,10 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 
   .pageContent {
     padding-top: 64px;
+    overflow-x: hidden;
   }
 
-  .shell { padding: 16px; }
+  .shell { padding: 16px; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
 
   .topbar h1 { font-size: 17px; }
 
@@ -1054,6 +1059,23 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   .kpi-grid {
     grid-template-columns: 1fr 1fr;
   }
+
+  /* Dashboard grids apilados en mobile */
+  .dbPanelsGrid { grid-template-columns: 1fr; }
+  .dbChartGrid  { grid-template-columns: 1fr; }
+
+  /* Tablas con scroll horizontal interno en vez de desbordar la página */
+  .entityTable {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* El thead pierde display:table-header-group al hacer block, lo corregimos */
+  .entityTable thead,
+  .entityTable tbody,
+  .entityTable tr { display: table; width: 100%; table-layout: auto; }
+  .entityTable thead { border-bottom: 1px solid var(--line); }
 }
 
 @media (max-width: 480px) {
