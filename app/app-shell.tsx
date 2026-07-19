@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { LayoutDashboard, ClipboardList, Users, Car, Settings, UserCog, Package, Calendar, LogOut, Search, ClipboardCheck, TrendingUp, Building2, Globe, MessageSquare } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, Users, Car, Settings, UserCog, Package, Calendar, LogOut, Search, ClipboardCheck, TrendingUp, Building2, Globe, MessageSquare, Menu, X } from 'lucide-react'
 
 interface AppShellProps {
   children: React.ReactNode
@@ -102,6 +102,7 @@ function GlobalSearch() {
 export default function AppShell({ children, session }: AppShellProps) {
   const router   = useRouter()
   const pathname = usePathname()
+  const [menuOpen,    setMenuOpen]    = useState(false)
   const [alertaStock, setAlertaStock] = useState(0)
   const [alertaCitas, setAlertaCitas] = useState(0)
   const [alertaChat,  setAlertaChat]  = useState(0)
@@ -137,10 +138,21 @@ export default function AppShell({ children, session }: AppShellProps) {
     admin: 'Administrador', mecanico: 'Mecánico', recepcion: 'Recepción',
   }
 
+  function closeMenu() { setMenuOpen(false) }
+
   return (
     <div className="appLayout">
+
+      {/* ── Hamburger button (mobile only) ── */}
+      <button className="hamburgerBtn" onClick={() => setMenuOpen(o => !o)} aria-label="Menú">
+        {menuOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {/* ── Overlay (mobile only) ── */}
+      {menuOpen && <div className="sidebarOverlay" onClick={closeMenu} />}
+
       {/* ── Sidebar ── */}
-      <aside className="sidebar">
+      <aside className={`sidebar${menuOpen ? ' open' : ''}`}>
         <div className="sidebarBrand">
           <img src="/checkmotor-logo.png" alt="Checkmotor" className="sidebarLogo" />
         </div>
@@ -153,7 +165,7 @@ export default function AppShell({ children, session }: AppShellProps) {
         <nav className="sidebarNav">
           <div className="sidebarSection">Módulos</div>
           {NAV.filter(n => !n.adminOnly || session.rol === 'admin').map(({ href, label, icon: Icon }) => (
-            <a key={href} href={href} className={`sidebarLink${pathname.startsWith(href) && (href !== '/dashboard' || pathname === '/dashboard') ? ' active' : ''}`}>
+            <a key={href} href={href} onClick={closeMenu} className={`sidebarLink${pathname.startsWith(href) && (href !== '/dashboard' || pathname === '/dashboard') ? ' active' : ''}`}>
               <Icon size={16} />
               {label}
               {href === '/agenda'         && alertaCitas > 0 && <span className="navBadge" style={{ width: 'auto', borderRadius: 10, padding: '0 5px', fontSize: 10, fontWeight: 700 }}>{alertaCitas}</span>}
@@ -163,15 +175,15 @@ export default function AppShell({ children, session }: AppShellProps) {
           ))}
           {session.rol === 'admin' && (
             <div style={{ marginTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 8 }}>
-              <a href="/checklist-config" className={`sidebarLink${pathname.startsWith('/checklist-config') ? ' active' : ''}`}>
+              <a href="/checklist-config" onClick={closeMenu} className={`sidebarLink${pathname.startsWith('/checklist-config') ? ' active' : ''}`}>
                 <ClipboardCheck size={16} />
                 Config. Checklist
               </a>
-              <a href="/perfil-taller" className={`sidebarLink${pathname.startsWith('/perfil-taller') ? ' active' : ''}`}>
+              <a href="/perfil-taller" onClick={closeMenu} className={`sidebarLink${pathname.startsWith('/perfil-taller') ? ' active' : ''}`}>
                 <Building2 size={16} />
                 Perfil del taller
               </a>
-              <a href="/configuracion" className={`sidebarLink${pathname.startsWith('/configuracion') ? ' active' : ''}`}>
+              <a href="/configuracion" onClick={closeMenu} className={`sidebarLink${pathname.startsWith('/configuracion') ? ' active' : ''}`}>
                 <Settings size={16} />
                 Configuración
               </a>
@@ -180,7 +192,7 @@ export default function AppShell({ children, session }: AppShellProps) {
           {session.superadmin && (
             <div style={{ marginTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 8 }}>
               <div className="sidebarSection">Plataforma</div>
-              <a href="/tenant" className={`sidebarLink${pathname.startsWith('/tenant') ? ' active' : ''}`}>
+              <a href="/tenant" onClick={closeMenu} className={`sidebarLink${pathname.startsWith('/tenant') ? ' active' : ''}`}>
                 <Globe size={16} />
                 Tenants
               </a>

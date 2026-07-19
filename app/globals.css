@@ -982,4 +982,86 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 .btn-pdf.boleta { background:var(--brand); color:white; border-color:var(--brand); }
 .btn-pdf.boleta:hover { opacity:.9; }
 
+/* ── Hamburger button (desktop: hidden) ── */
+.hamburgerBtn {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 300;
+  width: 40px;
+  height: 40px;
+  background: #101a17;
+  border: 1px solid #23342e;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #7a9e97;
+  flex-shrink: 0;
+}
+.hamburgerBtn:hover { color: #c8e6e1; border-color: #3a5a54; }
+
+/* ── Sidebar overlay (mobile) ── */
+.sidebarOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 199;
+  backdrop-filter: blur(2px);
+}
+
+/* ── Responsive: mobile ── */
+@media (max-width: 768px) {
+  .hamburgerBtn { display: flex; }
+
+  .appLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -240px;
+    width: 220px;
+    z-index: 200;
+    transition: left 0.25s ease;
+    box-shadow: none;
+  }
+
+  .sidebar.open {
+    left: 0;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .pageContent {
+    padding-top: 64px;
+  }
+
+  .shell { padding: 16px; }
+
+  .topbar h1 { font-size: 17px; }
+
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .detailPanel {
+    position: static;
+    width: 100%;
+  }
+
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .shell { padding: 12px; }
+}
+
 .numero-doc { font-size:.75rem; color:var(--muted); font-variant-numeric:tabular-nums; }
