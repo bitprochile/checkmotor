@@ -10,17 +10,11 @@ export async function GET(req: NextRequest) {
   const token     = searchParams.get('hub.verify_token')
   const challenge = searchParams.get('hub.challenge')
 
-  if (mode !== 'subscribe' || !challenge) {
+  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN
+  if (mode !== 'subscribe' || !challenge || !verifyToken || token !== verifyToken) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  await initDB()
-  const config = await queryOne<{ verify_token: string }>(
-    'SELECT verify_token FROM whatsapp_config WHERE verify_token = $1 AND activo = true',
-    [token],
-  )
-
-  if (!config) return NextResponse.json({ error: 'Invalid token' }, { status: 403 })
   return new NextResponse(challenge, { status: 200 })
 }
 
