@@ -15,8 +15,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
   await initDB()
   const { id } = await params
 
-  const config = await queryOne<{ phone_number_id: string; access_token: string; activo: boolean }>(
-    'SELECT phone_number_id, access_token, activo FROM whatsapp_config WHERE taller_id = $1',
+  const config = await queryOne<{ phone_number_id: string; access_token: string; verify_token: string; activo: boolean }>(
+    'SELECT phone_number_id, access_token, verify_token, activo FROM whatsapp_config WHERE taller_id = $1',
     [id],
   )
 
@@ -25,6 +25,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   return NextResponse.json({
     config: {
       phone_number_id:  config.phone_number_id,
+      verify_token:     config.verify_token,
       activo:           config.activo,
       has_access_token: config.access_token.trim().length > 0,
     },
@@ -35,17 +36,18 @@ export async function PUT(req: NextRequest, { params }: Params) {
   if (!await requireSuperAdmin()) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
   await initDB()
   const { id } = await params
-  const { phone_number_id, access_token, activo } = await req.json()
+  const { phone_number_id, access_token, verify_token, activo } = await req.json()
 
   await query(
     `INSERT INTO whatsapp_config (taller_id, phone_number_id, access_token, verify_token, activo, updated_at)
-     VALUES ($1,$2,$3,'',$4, NOW())
+     VALUES ($1,$2,$3,$4,$5, NOW())
      ON CONFLICT (taller_id) DO UPDATE SET
        phone_number_id = $2,
        access_token    = CASE WHEN $3 = '' THEN whatsapp_config.access_token ELSE $3 END,
-       activo          = $4,
+       verify_token    = COALESCE(NULLIF($4,''), whatsapp_config.verify_token),
+       activo          = $5,
        updated_at      = NOW()`,
-    [id, phone_number_id ?? '', access_token ?? '', activo !== false],
+    [id, phone_number_id ?? '', access_token ?? '', verify_token ?? '', activo !== false],
   )
 
   return NextResponse.json({ ok: true })

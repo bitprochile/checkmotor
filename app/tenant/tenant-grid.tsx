@@ -21,7 +21,8 @@ const FECHA = (d: string | Date | null) => d ? new Date(d).toLocaleDateString('e
 
 const EMPTY_TALLER = { nombre: '', email: '', telefono: '', direccion: '', activo: true, admin_nombre: '', admin_email: '', admin_password: '' }
 const EMPTY_USER   = { nombre: '', email: '', password: '', rol: 'admin', activo: true }
-const EMPTY_WA     = { phone_number_id: '', access_token: '', activo: true }
+const EMPTY_WA     = { phone_number_id: '', access_token: '', verify_token: '', activo: true }
+const WEBHOOK_URL  = 'https://portal.checkmotor.app/api/whatsapp/webhook'
 
 export default function TenantGrid() {
   const [talleres,   setTalleres]   = useState<TallerRow[]>([])
@@ -118,7 +119,7 @@ export default function TenantGrid() {
     const res  = await fetch(`/api/tenant/${selected.id}/whatsapp`)
     const data = await res.json()
     if (data.config) {
-      setWf({ phone_number_id: data.config.phone_number_id, access_token: '', activo: data.config.activo })
+      setWf({ phone_number_id: data.config.phone_number_id, access_token: '', verify_token: data.config.verify_token ?? '', activo: data.config.activo })
       setWaHasToken(data.config.has_access_token)
     }
   }
@@ -474,7 +475,33 @@ export default function TenantGrid() {
               </p>
               {error && <div className="warningBox" style={{ marginBottom: 12 }}>{error}</div>}
               <form onSubmit={saveWhatsApp}>
-                <div className="entityForm" style={{ marginBottom: 20 }}>
+                <div className="entityForm" style={{ marginBottom: 16 }}>
+
+                  {/* Webhook URL — readonly copiable */}
+                  <label>
+                    <span>URL del Webhook <span style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 400 }}>(usar en Meta)</span></span>
+                    <div style={{ position: 'relative' }}>
+                      <input readOnly value={WEBHOOK_URL} style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--muted)', paddingRight: 72 }} />
+                      <button type="button"
+                        onClick={() => { navigator.clipboard.writeText(WEBHOOK_URL); flash('URL copiada') }}
+                        style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', fontSize: 11, padding: '2px 8px', background: 'var(--panel-strong)', border: '1px solid var(--line)', borderRadius: 4, cursor: 'pointer', color: 'var(--brand-dark)', fontWeight: 600 }}>
+                        Copiar
+                      </button>
+                    </div>
+                  </label>
+
+                  {/* Verify Token */}
+                  <label>
+                    <span>Token de verificación *</span>
+                    <input
+                      value={wf.verify_token}
+                      onChange={e => setWf(f => ({ ...f, verify_token: e.target.value }))}
+                      required placeholder="Ej: cm_wh_verify_taller1"
+                      style={{ fontFamily: 'monospace', fontSize: 13 }}
+                    />
+                  </label>
+
+                  {/* Phone Number ID */}
                   <label>
                     <span>Phone Number ID *</span>
                     <input
@@ -484,10 +511,10 @@ export default function TenantGrid() {
                       style={{ fontFamily: 'monospace', fontSize: 13 }}
                     />
                   </label>
+
+                  {/* Access Token */}
                   <label>
-                    <span>
-                      Access Token {waHasToken && <span style={{ fontSize: 11, color: 'var(--ok)', fontWeight: 600 }}>✓ ya configurado</span>}
-                    </span>
+                    <span>Access Token {waHasToken && <span style={{ fontSize: 11, color: 'var(--ok)', fontWeight: 600 }}>✓ ya configurado</span>}</span>
                     <div style={{ position: 'relative' }}>
                       <input
                         type={showToken ? 'text' : 'password'}
@@ -502,19 +529,13 @@ export default function TenantGrid() {
                       </button>
                     </div>
                   </label>
+
                   <label style={{ flexDirection: 'row', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                     <input type="checkbox" checked={wf.activo} onChange={e => setWf(f => ({ ...f, activo: e.target.checked }))} style={{ width: 'auto', margin: 0 }} />
                     <span style={{ fontWeight: 500 }}>WhatsApp activo para este taller</span>
                   </label>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16, padding: '10px 12px', background: 'var(--panel-strong)', borderRadius: 6, border: '1px solid var(--line)' }}>
-                  <strong style={{ display: 'block', marginBottom: 4 }}>URL del webhook:</strong>
-                  <code style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--brand-dark)' }}>
-                    https://portal.checkmotor.app/api/whatsapp/webhook
-                  </code>
-                  <strong style={{ display: 'block', marginTop: 8, marginBottom: 2 }}>Token de verificación:</strong>
-                  <span style={{ fontSize: 11 }}>Ver variable <code>WHATSAPP_VERIFY_TOKEN</code> en el servidor.</span>
-                </div>
+
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button type="submit" className="button teal" disabled={saving} style={{ flex: 1 }}>
                     {saving ? 'Guardando…' : 'Guardar configuración'}
