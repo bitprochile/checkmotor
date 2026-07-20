@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Pencil, Trash2, RefreshCw, Power, Users, Building2, X, Check } from 'lucide-react'
+import { Plus, Pencil, Trash2, RefreshCw, Power, Users, Building2, X, Check, MessageSquare, Eye, EyeOff } from 'lucide-react'
 
 interface TallerRow {
   id: number; nombre: string; activo: boolean; email: string | null
@@ -14,13 +14,14 @@ interface UsuarioTenant {
   activo: boolean; superadmin: boolean; created_at: string
 }
 
-type PanelMode = 'idle' | 'view' | 'create-taller' | 'edit-taller' | 'create-user' | 'edit-user'
+type PanelMode = 'idle' | 'view' | 'create-taller' | 'edit-taller' | 'create-user' | 'edit-user' | 'whatsapp'
 
 const ROL: Record<string, string> = { admin: 'Admin', mecanico: 'Mecánico', recepcion: 'Recepción' }
 const FECHA = (d: string | Date | null) => d ? new Date(d).toLocaleDateString('es-CL') : '—'
 
 const EMPTY_TALLER = { nombre: '', email: '', telefono: '', direccion: '', activo: true, admin_nombre: '', admin_email: '', admin_password: '' }
 const EMPTY_USER   = { nombre: '', email: '', password: '', rol: 'admin', activo: true }
+const EMPTY_WA     = { phone_number_id: '', access_token: '', activo: true }
 
 export default function TenantGrid() {
   const [talleres,   setTalleres]   = useState<TallerRow[]>([])
@@ -35,6 +36,9 @@ export default function TenantGrid() {
   const [confirm,    setConfirm]    = useState<null | { label: string; action: () => Promise<void> }>(null)
   const [tf,         setTf]         = useState(EMPTY_TALLER)
   const [uf,         setUf]         = useState(EMPTY_USER)
+  const [wf,         setWf]         = useState(EMPTY_WA)
+  const [waHasToken, setWaHasToken] = useState(false)
+  const [showToken,  setShowToken]  = useState(false)
 
   const loadTalleres = useCallback(async () => {
     setLoading(true)
@@ -101,6 +105,33 @@ export default function TenantGrid() {
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? 'No se pudo eliminar'); setSaving(false); return }
       await loadTalleres(); setSelected(null); setMode('idle'); flash('Empresa eliminada')
+    } catch { setError('Error de conexión') }
+    finally { setSaving(false) }
+  }
+
+  // ── WhatsApp actions ──────────────────────────────────────────────────────
+
+  async function startWhatsApp() {
+    if (!selected) return
+    setMode('whatsapp'); setError(''); setShowToken(false)
+    setWf(EMPTY_WA); setWaHasToken(false)
+    const res  = await fetch(`/api/tenant/${selected.id}/whatsapp`)
+    const data = await res.json()
+    if (data.config) {
+      setWf({ phone_number_id: data.config.phone_number_id, access_token: '', activo: data.config.activo })
+      setWaHasToken(data.config.has_access_token)
+    }
+  }
+
+  async function saveWhatsApp(e: React.FormEvent) {
+    e.preventDefault(); if (!selected) return; setSaving(true); setError('')
+    try {
+      const res  = await fetch(`/api/tenant/${selected.id}/whatsapp`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(wf),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Error al guardar'); return }
+      flash('Configuración WhatsApp guardada'); setMode('view')
     } catch { setError('Error de conexión') }
     finally { setSaving(false) }
   }
@@ -244,6 +275,7 @@ export default function TenantGrid() {
                     </span>
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                    <button className="iconButton" onClick={startWhatsApp} title="WhatsApp API"><MessageSquare size={14} /></button>
                     <button className="iconButton" onClick={startEdit} title="Editar"><Pencil size={14} /></button>
                     <button
                       className="iconButton" title={selected.activo ? 'Desactivar' : 'Activar'}
@@ -420,6 +452,72 @@ export default function TenantGrid() {
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button type="submit" className="button teal" disabled={saving} style={{ flex: 1 }}>
                     {saving ? 'Guardando…' : 'Guardar cambios'}
+                  </button>
+                  <button type="button" className="button" onClick={() => setMode('view')} disabled={saving}>Cancelar</button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* whatsapp config */}
+          {mode === 'whatsapp' && selected && (
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <MessageSquare size={16} style={{ color: 'var(--brand)' }} />
+                  WhatsApp API — {selected.nombre}
+                </span>
+                <button className="iconButton" onClick={() => setMode('view')}><X size={14} /></button>
+              </div>
+              <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>
+                Credenciales de Meta Cloud API para este taller.
+              </p>
+              {error && <div className="warningBox" style={{ marginBottom: 12 }}>{error}</div>}
+              <form onSubmit={saveWhatsApp}>
+                <div className="entityForm" style={{ marginBottom: 20 }}>
+                  <label>
+                    <span>Phone Number ID *</span>
+                    <input
+                      value={wf.phone_number_id}
+                      onChange={e => setWf(f => ({ ...f, phone_number_id: e.target.value }))}
+                      required placeholder="Ej: 123456789012345"
+                      style={{ fontFamily: 'monospace', fontSize: 13 }}
+                    />
+                  </label>
+                  <label>
+                    <span>
+                      Access Token {waHasToken && <span style={{ fontSize: 11, color: 'var(--ok)', fontWeight: 600 }}>✓ ya configurado</span>}
+                    </span>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type={showToken ? 'text' : 'password'}
+                        value={wf.access_token}
+                        onChange={e => setWf(f => ({ ...f, access_token: e.target.value }))}
+                        placeholder={waHasToken ? 'Dejar vacío para mantener el actual' : 'EAAx…'}
+                        style={{ fontFamily: 'monospace', fontSize: 12, paddingRight: 36 }}
+                      />
+                      <button type="button" onClick={() => setShowToken(v => !v)}
+                        style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: 0 }}>
+                        {showToken ? <EyeOff size={14} /> : <Eye size={14} />}
+                      </button>
+                    </div>
+                  </label>
+                  <label style={{ flexDirection: 'row', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={wf.activo} onChange={e => setWf(f => ({ ...f, activo: e.target.checked }))} style={{ width: 'auto', margin: 0 }} />
+                    <span style={{ fontWeight: 500 }}>WhatsApp activo para este taller</span>
+                  </label>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16, padding: '10px 12px', background: 'var(--panel-strong)', borderRadius: 6, border: '1px solid var(--line)' }}>
+                  <strong style={{ display: 'block', marginBottom: 4 }}>URL del webhook:</strong>
+                  <code style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--brand-dark)' }}>
+                    https://portal.checkmotor.app/api/whatsapp/webhook
+                  </code>
+                  <strong style={{ display: 'block', marginTop: 8, marginBottom: 2 }}>Token de verificación:</strong>
+                  <span style={{ fontSize: 11 }}>Ver variable <code>WHATSAPP_VERIFY_TOKEN</code> en el servidor.</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button type="submit" className="button teal" disabled={saving} style={{ flex: 1 }}>
+                    {saving ? 'Guardando…' : 'Guardar configuración'}
                   </button>
                   <button type="button" className="button" onClick={() => setMode('view')} disabled={saving}>Cancelar</button>
                 </div>
