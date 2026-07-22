@@ -10,8 +10,10 @@ services:
       db:
         condition: service_healthy
     networks:
-      - default
-      - raven_forge
+      default:
+      raven_forge:
+        aliases:
+          - checkmotor_app
 
   db:
     image: postgres:16-alpine
