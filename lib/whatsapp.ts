@@ -57,6 +57,18 @@ export function generarLinkWhatsApp(plantilla: PlantillaWA, datos: DatosWA): str
 
 const META_API = 'https://graph.facebook.com/v21.0'
 
+export async function marcarLeido({
+  phoneNumberId, accessToken, messageId,
+}: {
+  phoneNumberId: string; accessToken: string; messageId: string
+}): Promise<void> {
+  await fetch(`${META_API}/${phoneNumberId}/messages`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messaging_product: 'whatsapp', status: 'read', message_id: messageId }),
+  }).catch(() => {})
+}
+
 export async function enviarMensajeAPI({
   phoneNumberId, accessToken, to, texto,
 }: {

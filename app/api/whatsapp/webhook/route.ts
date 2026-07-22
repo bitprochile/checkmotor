@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { initDB, query, queryOne } from '@/lib/db'
-import { enviarMensajeAPI, extraerTexto } from '@/lib/whatsapp'
+import { enviarMensajeAPI, extraerTexto, marcarLeido } from '@/lib/whatsapp'
 import { procesarMensaje } from '@/lib/ai-agent'
 
 // GET — verificación del webhook por Meta
@@ -94,7 +94,13 @@ async function procesarPayload(body: unknown) {
           [conv.id, config.taller_id, texto, wamid],
         )
 
+        // Marcar como leído inmediatamente (doble tick azul en el teléfono del cliente)
+        marcarLeido({ phoneNumberId: config.phone_number_id, accessToken: config.access_token, messageId: wamid })
+
         if (conv.modo !== 'bot') continue
+
+        // Pausa natural antes de responder (simula "escribiendo...")
+        await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000))
 
         // Procesar con IA
         const historial = await query<{ direccion: 'entrante' | 'saliente'; contenido: string }>(

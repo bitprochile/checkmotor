@@ -1,5 +1,9 @@
-import { Pool, PoolClient } from 'pg'
+import { Pool, PoolClient, types } from 'pg'
 import bcrypt from 'bcryptjs'
+
+// TIMESTAMP WITHOUT TIME ZONE (OID 1114): pg por defecto lo interpreta como UTC,
+// pero la app y la DB corren en America/Santiago, por lo que debe parsearse como hora local.
+types.setTypeParser(1114, (str: string) => new Date(str.replace(' ', 'T')))
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 

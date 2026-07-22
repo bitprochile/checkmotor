@@ -160,7 +160,7 @@ async function crearCita(args: {
 
     const { rows: citaRows } = await client.query(
       `INSERT INTO citas (taller_id, vehiculo_id, fecha_hora, duracion_min, estado, tipo_servicio, observaciones)
-       VALUES ($1,$2,$3,60,'pendiente',$4,$5) RETURNING id`,
+       VALUES ($1,$2, ($3::timestamp AT TIME ZONE 'America/Santiago') ,60,'pendiente',$4,$5) RETURNING id`,
       [tallerId, vehiculoId, args.fecha_hora, args.tipo_servicio,
        `Agendado vía WhatsApp. Cliente: ${args.nombre_cliente}`],
     )
@@ -185,10 +185,10 @@ async function buildSystemPrompt(tallerId: number): Promise<string> {
       'SELECT hora_apertura, hora_cierre, dias_atencion FROM configuracion_taller WHERE taller_id = $1',
       [tallerId],
     ).catch(() => null),
-    query<{ nombre: string }>(
-      'SELECT nombre FROM servicios WHERE taller_id = $1 AND activo = true ORDER BY nombre LIMIT 20',
+    query<{ nombre: string; descripcion: string | null; precio_base: string | null }>(
+      'SELECT nombre, descripcion, precio_base FROM servicios WHERE taller_id = $1 AND activo = true ORDER BY nombre LIMIT 30',
       [tallerId],
-    ).catch(() => [] as { nombre: string }[]),
+    ).catch(() => [] as { nombre: string; descripcion: string | null; precio_base: string | null }[]),
   ])
 
   const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
@@ -197,7 +197,13 @@ async function buildSystemPrompt(tallerId: number): Promise<string> {
     ? `${config.hora_apertura.slice(0, 5)} a ${config.hora_cierre.slice(0, 5)}, ${config.dias_atencion.map(d => DIAS[d]).join(', ')}`
     : 'horario a confirmar'
   const listaServicios = servicios.length > 0
-    ? servicios.map(s => `• ${s.nombre}`).join('\n')
+    ? servicios.map(s => {
+        const precio = s.precio_base && Number(s.precio_base) > 0
+          ? ` — $${Number(s.precio_base).toLocaleString('es-CL')}`
+          : ' — precio a consultar'
+        const desc = s.descripcion ? ` (${s.descripcion})` : ''
+        return `• ${s.nombre}${desc}${precio}`
+      }).join('\n')
     : '• Consultar disponibilidad directamente'
 
   const ahora = new Date().toLocaleString('es-CL', {
@@ -205,18 +211,18 @@ async function buildSystemPrompt(tallerId: number): Promise<string> {
     hour: '2-digit', minute: '2-digit',
   })
 
-  return `Eres el asistente virtual de agendamiento de ${nombreTaller}. Eres amable, profesional y eficiente en español.
+  return `Eres el asistente virtual de ${nombreTaller}. Eres amable, profesional y eficiente en español.
 
 FECHA Y HORA ACTUAL: ${ahora}
 
 HORARIO DE ATENCIÓN: ${horario}
 
-SERVICIOS DISPONIBLES:
+SERVICIOS Y PRECIOS VIGENTES:
 ${listaServicios}
 
-TU MISIÓN: Ayudar a los clientes a agendar citas para su vehículo.
+TU MISIÓN: Ayudar a los clientes respondiendo consultas sobre servicios y precios, y agendar citas para su vehículo.
 
-DATOS QUE NECESITAS RECOPILAR (en este orden):
+DATOS QUE NECESITAS RECOPILAR PARA AGENDAR (en este orden):
 1. Nombre del cliente
 2. Tipo de servicio requerido
 3. Patente, marca y modelo del vehículo
@@ -224,8 +230,10 @@ DATOS QUE NECESITAS RECOPILAR (en este orden):
 5. Hora (de las disponibles) → luego usa crear_cita para confirmar
 
 REGLAS IMPORTANTES:
+- Si el cliente pregunta por precios o servicios, respóndele directamente con la información de arriba
 - SIEMPRE usa verificar_disponibilidad antes de ofrecer o confirmar horarios
-- NUNCA inventes horarios disponibles
+- NUNCA inventes horarios disponibles ni precios que no estén en la lista
+- Si un servicio no tiene precio definido, indica que debe consultarse directamente
 - Responde de forma concisa (máximo 3-4 líneas por mensaje)
 - Si el cliente pide hablar con una persona, usa transferir_a_humano
 - Si hay un reclamo o problema complejo, usa transferir_a_humano
