@@ -18,7 +18,7 @@ interface Mensaje {
 
 interface WaConfig {
   phone_number_id: string; verify_token: string; activo: boolean
-  has_access_token: boolean
+  has_access_token: boolean; nombre_agente: string
 }
 
 type Filtro  = 'todas' | 'bot' | 'humano' | 'cerrada'
@@ -63,7 +63,7 @@ export default function ConversacionesGrid() {
   const [sending,    setSending]    = useState(false)
   const [texto,      setTexto]      = useState('')
   const [error,      setError]      = useState('')
-  const [config,      setConfig]     = useState<WaConfig>({ phone_number_id: '', verify_token: '', activo: false, has_access_token: false })
+  const [config,      setConfig]     = useState<WaConfig>({ phone_number_id: '', verify_token: '', activo: false, has_access_token: false, nombre_agente: 'Asistente' })
   const [accessToken, setAccessToken] = useState('')
   const [savingCfg,  setSavingCfg]  = useState(false)
   const [cfgOk,      setCfgOk]      = useState(false)
@@ -164,6 +164,7 @@ export default function ConversacionesGrid() {
           verify_token:    config.verify_token,
           activo:          config.activo,
           access_token:    accessToken,  // "" = mantener existente
+          nombre_agente:   config.nombre_agente,
         }),
       })
       setCfgOk(true); setTimeout(() => setCfgOk(false), 3000)
@@ -437,6 +438,15 @@ export default function ConversacionesGrid() {
                       value={config.verify_token}
                       onChange={e => setConfig(c => ({ ...c, verify_token: e.target.value }))}
                       placeholder="mi-token-secreto-123"
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>Nombre del agente</span>
+                    <input
+                      value={config.nombre_agente}
+                      onChange={e => setConfig(c => ({ ...c, nombre_agente: e.target.value }))}
+                      placeholder="Asistente"
                       required
                     />
                   </label>

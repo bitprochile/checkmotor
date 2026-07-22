@@ -178,7 +178,7 @@ async function crearCita(args: {
 // ── System prompt builder ───────────────────────────────────────────────────
 
 async function buildSystemPrompt(tallerId: number): Promise<string> {
-  const [perfil, config, servicios] = await Promise.all([
+  const [perfil, config, servicios, waConfig] = await Promise.all([
     queryOne<{ nombre: string }>('SELECT nombre FROM perfil_taller WHERE taller_id = $1', [tallerId])
       .catch(() => null),
     queryOne<{ hora_apertura: string; hora_cierre: string; dias_atencion: number[] }>(
@@ -189,10 +189,13 @@ async function buildSystemPrompt(tallerId: number): Promise<string> {
       'SELECT nombre, descripcion, precio_base FROM servicios WHERE taller_id = $1 AND activo = true ORDER BY nombre LIMIT 30',
       [tallerId],
     ).catch(() => [] as { nombre: string; descripcion: string | null; precio_base: string | null }[]),
+    queryOne<{ nombre_agente: string }>('SELECT nombre_agente FROM whatsapp_config WHERE taller_id = $1 AND activo = true', [tallerId])
+      .catch(() => null),
   ])
 
   const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
   const nombreTaller = perfil?.nombre ?? 'el taller'
+  const nombreAgente = waConfig?.nombre_agente ?? 'Asistente'
   const horario = config
     ? `${config.hora_apertura.slice(0, 5)} a ${config.hora_cierre.slice(0, 5)}, ${config.dias_atencion.map(d => DIAS[d]).join(', ')}`
     : 'horario a confirmar'
@@ -211,7 +214,9 @@ async function buildSystemPrompt(tallerId: number): Promise<string> {
     hour: '2-digit', minute: '2-digit',
   })
 
-  return `Eres el asistente virtual de ${nombreTaller}. Eres amable, profesional y eficiente en español.
+  return `Eres ${nombreAgente}, el asistente virtual de ${nombreTaller}. Eres amable, profesional y eficiente en español.
+
+PRESENTACIÓN: Cuando alguien te saluda por primera vez, preséntate con tu nombre y el nombre del taller. Ejemplo: "¡Hola! Soy ${nombreAgente}, el asistente de ${nombreTaller}. ¿En qué te puedo ayudar?"
 
 FECHA Y HORA ACTUAL: ${ahora}
 

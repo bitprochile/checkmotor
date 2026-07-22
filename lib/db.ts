@@ -537,6 +537,7 @@ async function ensureWhatsappConfig() {
     )
   `)
   await pool.query(`ALTER TABLE whatsapp_config DROP COLUMN IF EXISTS openai_api_key`)
+  await pool.query(`ALTER TABLE whatsapp_config ADD COLUMN IF NOT EXISTS nombre_agente VARCHAR(100) NOT NULL DEFAULT 'Asistente'`)
 }
 
 async function ensureWhatsappConversaciones() {
