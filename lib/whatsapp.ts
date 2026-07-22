@@ -67,9 +67,12 @@ export async function marcarLeido({
     headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ messaging_product: 'whatsapp', status: 'read', message_id: messageId }),
   }).catch(err => { console.error('[marcarLeido] fetch error:', err); return null })
-  if (res && !res.ok) {
-    const text = await res.text().catch(() => '')
-    console.error('[marcarLeido] Meta API error', res.status, text)
+  if (!res) return
+  const body = await res.text().catch(() => '')
+  if (res.ok) {
+    console.log('[marcarLeido] OK', res.status, body)
+  } else {
+    console.error('[marcarLeido] ERROR', res.status, body)
   }
 }
 
