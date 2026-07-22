@@ -20,7 +20,8 @@ jobs:
             APP_DIR="/home/ubuntu/checkmotor"
             if [ -d "$APP_DIR/.git" ]; then
               cd "$APP_DIR"
-              git pull origin master
+              git fetch origin
+              git reset --hard origin/master
             else
               git clone https://github.com/bitprochile/checkmotor.git "$APP_DIR"
               cd "$APP_DIR"
