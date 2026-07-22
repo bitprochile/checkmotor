@@ -11,7 +11,7 @@ services:
         condition: service_healthy
     networks:
       default:
-      raven_forge:
+      caddy_proxy:
         aliases:
           - checkmotor_app
 
@@ -38,9 +38,9 @@ services:
 networks:
   default:
     driver: bridge
-  raven_forge:
+  caddy_proxy:
     external: true
-    name: raven_forge_default
+    name: caddy_proxy_net
 
 volumes:
   postgres_data:
