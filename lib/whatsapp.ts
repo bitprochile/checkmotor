@@ -62,12 +62,17 @@ export async function marcarLeido({
 }: {
   phoneNumberId: string; accessToken: string; messageId: string
 }): Promise<void> {
-  await fetch(`${META_API}/${phoneNumberId}/messages`, {
+  const res = await fetch(`${META_API}/${phoneNumberId}/messages`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ messaging_product: 'whatsapp', status: 'read', message_id: messageId }),
-  }).catch(() => {})
+  }).catch(err => { console.error('[marcarLeido] fetch error:', err); return null })
+  if (res && !res.ok) {
+    const text = await res.text().catch(() => '')
+    console.error('[marcarLeido] Meta API error', res.status, text)
+  }
 }
+
 
 export async function enviarMensajeAPI({
   phoneNumberId, accessToken, to, texto,
