@@ -94,8 +94,8 @@ async function procesarPayload(body: unknown) {
           [conv.id, config.taller_id, texto, wamid],
         )
 
-        // Marcar como leído inmediatamente (doble tick azul en el teléfono del cliente)
-        marcarLeido({ phoneNumberId: config.phone_number_id, accessToken: config.access_token, messageId: wamid })
+        // Marcar como leído + activar "escribiendo..." — awaited para garantizar que Meta lo registre
+        await marcarLeido({ phoneNumberId: config.phone_number_id, accessToken: config.access_token, messageId: wamid })
 
         if (conv.modo !== 'bot') continue
 
