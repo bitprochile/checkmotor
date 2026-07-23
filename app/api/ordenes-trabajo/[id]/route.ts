@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query, queryOne, OrdenTrabajo, EstadoOrden } from '@/lib/db'
 import { getSession } from '@/lib/api-session'
+import { enviarMensajeAPI } from '@/lib/whatsapp'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -67,7 +68,65 @@ export async function PUT(req: NextRequest, { params }: Params) {
     ],
   )
   if (!orden) return NextResponse.json({ error: 'No encontrado' }, { status: 404 })
+
+  // Notificar por WhatsApp cuando la orden pasa a "completada"
+  if (nuevoEstado === 'completada' && actual.estado !== 'completada') {
+    notificarCompletada(Number(id), session.tallerId).catch(err =>
+      console.error('[whatsapp-completada]', err),
+    )
+  }
+
   return NextResponse.json({ orden })
+}
+
+async function notificarCompletada(ordenId: number, tallerId: number) {
+  const [datos, plantillaRow] = await Promise.all([
+    queryOne<{
+      cliente_nombre: string; telefono: string | null
+      patente: string; marca: string; modelo: string
+      taller_nombre: string | null
+      phone_number_id: string; access_token: string
+    }>(
+      `SELECT
+         c.nombre        AS cliente_nombre,
+         c.telefono,
+         v.patente, v.marca, v.modelo,
+         pt.nombre       AS taller_nombre,
+         wc.phone_number_id,
+         wc.access_token
+       FROM ordenes_trabajo ot
+       JOIN vehiculos v      ON ot.vehiculo_id = v.id
+       JOIN clientes  c      ON v.cliente_id   = c.id
+       LEFT JOIN perfil_taller  pt ON pt.taller_id  = ot.taller_id
+       LEFT JOIN whatsapp_config wc ON wc.taller_id  = ot.taller_id AND wc.activo = true
+       WHERE ot.id = $1 AND ot.taller_id = $2`,
+      [ordenId, tallerId],
+    ),
+    queryOne<{ plantilla: string }>(
+      `SELECT plantilla FROM mensajes_chatbot WHERE tipo = 'orden_completada' AND activo = true`,
+    ).catch(() => null),
+  ])
+
+  if (!datos?.telefono || !datos.phone_number_id || !datos.access_token) return
+  if (!plantillaRow) return  // mensaje desactivado o no existe
+
+  const tel    = datos.telefono.replace(/\D/g, '')
+  const numero = tel.startsWith('56') ? tel : `56${tel}`
+
+  const nombreTaller = datos.taller_nombre ?? 'el taller'
+  const vehiculo     = `${datos.marca} ${datos.modelo} (${datos.patente})`
+
+  const texto = plantillaRow.plantilla
+    .replace(/\{cliente_nombre\}/g, datos.cliente_nombre)
+    .replace(/\{vehiculo\}/g,       vehiculo)
+    .replace(/\{taller_nombre\}/g,  nombreTaller)
+
+  await enviarMensajeAPI({
+    phoneNumberId: datos.phone_number_id,
+    accessToken:   datos.access_token,
+    to:            numero,
+    texto,
+  })
 }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {

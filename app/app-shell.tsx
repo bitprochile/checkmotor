@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { LayoutDashboard, ClipboardList, Users, Car, Settings, UserCog, Package, Calendar, LogOut, Search, ClipboardCheck, TrendingUp, Building2, Globe, MessageSquare, Menu, X } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, Users, Car, Settings, UserCog, Package, Calendar, LogOut, Search, ClipboardCheck, TrendingUp, Building2, Globe, MessageSquare, Bot, Menu, X } from 'lucide-react'
 
 interface AppShellProps {
   children: React.ReactNode
@@ -195,6 +195,10 @@ export default function AppShell({ children, session }: AppShellProps) {
               <a href="/tenant" onClick={closeMenu} className={`sidebarLink${pathname.startsWith('/tenant') ? ' active' : ''}`}>
                 <Globe size={16} />
                 Tenants
+              </a>
+              <a href="/mensajes-chatbot" onClick={closeMenu} className={`sidebarLink${pathname.startsWith('/mensajes-chatbot') ? ' active' : ''}`}>
+                <Bot size={16} />
+                Mensajes Chatbot
               </a>
             </div>
           )}

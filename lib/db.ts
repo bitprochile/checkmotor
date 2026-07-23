@@ -612,5 +612,28 @@ export async function initDB(): Promise<void> {
   await ensureWhatsappConfig()
   await ensureWhatsappConversaciones()
   await ensureWhatsappMensajes()
+  await ensureMensajesChatbot()
   initialized = true
+}
+
+async function ensureMensajesChatbot(): Promise<void> {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS mensajes_chatbot (
+      tipo        VARCHAR(60)  PRIMARY KEY,
+      nombre      VARCHAR(100) NOT NULL,
+      descripcion TEXT,
+      plantilla   TEXT         NOT NULL,
+      activo      BOOLEAN      NOT NULL DEFAULT true
+    )
+  `)
+  await pool.query(`
+    INSERT INTO mensajes_chatbot (tipo, nombre, descripcion, plantilla)
+    VALUES (
+      'orden_completada',
+      'Orden completada',
+      'Se envía cuando una orden de trabajo pasa al estado "Completada". Variables disponibles: {cliente_nombre}, {vehiculo}, {taller_nombre}',
+      '¡Hola {cliente_nombre}! Tu vehículo {vehiculo} ya está listo para ser retirado en {taller_nombre}. ¡Te esperamos! 🔧'
+    )
+    ON CONFLICT (tipo) DO NOTHING
+  `)
 }
